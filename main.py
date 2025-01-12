@@ -16,6 +16,12 @@ from configparser import RawConfigParser
 import fastapi
 from pydantic import BaseModel
 
+_version = "0.1.0"
+
+config = RawConfigParser()
+config.read("config.ini")
+port = config.getint("server", "port")
+endpoints_prefix = config.get("server", "endpoints_prefix")
 
 app = fastapi.FastAPI()
 
@@ -34,7 +40,7 @@ users = [
 ]
 
 
-@app.get("/")
+@app.get(f"{endpoints_prefix}/")
 def read_root():
     return {"Hello": "World"}
 
@@ -46,7 +52,7 @@ class RfidData(BaseModel):
     msg_id: int
 
 
-@app.get("/fichajes/datetime.php")
+@app.get(f"{endpoints_prefix}/datetime.php")
 def get_datetime():
     now = datetime.datetime.now()
     res = {"day": now.day, "month": now.month, "year": now.year,
@@ -55,7 +61,7 @@ def get_datetime():
     return res
 
 
-@app.post("/fichajes/rfid.php")
+@app.post(f"{endpoints_prefix}/rfid.php")
 def read_rfid(uid_data: RfidData):
     # Devolver error 403
     # return fastapi.Response(status_code=403)
@@ -96,24 +102,6 @@ def read_rfid(uid_data: RfidData):
     return res
 
 
-@app.get("/get")
-def get_data():
-    return "Se ha hecho un GET"
-
-
-@app.get("/time")
-def get_time():
-    return datetime.datetime.now().strftime("%Y-%m-%d\n%H:%M:%S")
-
-
-@app.post("/post")
-def post_data(uid_data: RfidData):
-    print(uid_data)
-    return "Se ha hecho un POST"
-
-
 if __name__ == "__main__":
-    config = RawConfigParser()
-    config.read("config.ini")
-    port = config.getint("server", "port")
+    print(f"Iniciando versión {_version}")
     uvicorn.run(app, host="", port=port)
