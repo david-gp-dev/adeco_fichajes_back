@@ -42,13 +42,16 @@ def read_root():
 class RfidData(BaseModel):
     uid: str
     hash: str
+    date_time: str
+    msg_id: int
 
 
 @app.get("/fichajes/datetime.php")
 def get_datetime():
     now = datetime.datetime.now()
     res = {"day": now.day, "month": now.month, "year": now.year,
-           "hour": now.hour, "minute": now.minute, "second": now.second}
+           "hour": now.hour, "minute": now.minute, "second": now.second,
+           "str": now.strftime("%Y-%m-%d %H:%M:%S")}
     return res
 
 
@@ -73,17 +76,22 @@ def read_rfid(uid_data: RfidData):
                    "snd": f"/{'bienvenido' if not is_in else 'adios'}_{user_id}.wav",
                    "vol": 128}
             break
-        else:
-            res = {"txt": f"Desconocido\n{uid_data.uid}",
-                   "color": 0x000000, "bkg": 0xFF0000,
-                   "snd": "/error.wav", "vol": 128,
-                   "time": 10000}
-            print(f"***\n\"{uid_data.uid}\"\n***no está en la lista de usuarios")
+    else:
+        res = {"txt": f"Desconocido\n{uid_data.uid}",
+               "color": 0x000000, "bkg": 0xFF0000,
+               "snd": "/error.wav", "vol": 128,
+               "time": 10000}
+        print(f"***\n\"{uid_data.uid}\"\n***no está en la lista de usuarios")
 
     print(uid_data)
+    print(uid_data.hash)
     md5 = hashlib.md5()
+    md5.update("dj6Fdkafic4jesdKf8y43ulsf".encode())
     md5.update(uid_data.uid.encode())
-    print(md5.hexdigest())
+    md5.update(str(uid_data.msg_id).encode())
+    md5.update(uid_data.date_time.encode())
+    print("Recibido:  ", uid_data.hash)
+    print("Calculado: ", md5.hexdigest())
     print(res)
     return res
 
