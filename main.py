@@ -19,7 +19,7 @@ import fastapi
 from pydantic import BaseModel
 import fichajes_manager as fm
 
-_version = "1.0.0"
+_version = "1.0.1"
 
 config = RawConfigParser()
 config.read("config.ini")
@@ -68,7 +68,8 @@ def get_datetime():
     now = datetime.datetime.now()
     res = {"day": now.day, "month": now.month, "year": now.year,
            "hour": now.hour, "minute": now.minute, "second": now.second,
-           "str": now.strftime("%Y-%m-%d %H:%M:%S")}
+           "str": now.strftime("%Y-%m-%d %H:%M:%S")}  # El str es para que el dispositivo haga el hash
+    print(res)
     return res
 
 
@@ -82,9 +83,10 @@ def rfid_post(uid_data: RfidData):
     if user is not None:
         saludo = ("Bienvenida" if user.sex == "f" else "Bienvenido") if user.is_in else "Adios"
         hora = local_now.strftime("%H:%M")
+        user_audio = user.audio if user.audio else user.id
         res = {"txt": f"{saludo}\n{user.name}\n{hora}",
                "color": 0x000000, "bkg": 0x00FF00 if user.is_in else 0x0000FF,
-               "snd": f"/{'bienvenido' if user.is_in else 'adios'}_{user.id}.wav",
+               "snd": f"/{'bienvenido' if user.is_in else 'adios'}_{user_audio}.wav",
                "vol": 200}
     else:
         res = {"txt": f"Desconocido\n{uid_data.uid}",

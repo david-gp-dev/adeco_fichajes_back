@@ -59,6 +59,8 @@ def load_users():
     if os.path.exists(users_path):
         with open(users_path) as file:
             for line in file:
+                if line.startswith("#"):
+                    continue
                 user = json.loads(line)
                 _users[user["id"]] = User.model_validate(user)
 

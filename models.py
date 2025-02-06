@@ -26,6 +26,7 @@ class User(BaseModel):
     name: str
     sex: str
     uids: list[str]
+    audio: str | None = None
     fichajes: list[Fichaje] = []
 
     def add_fichaje(self, fichaje: Fichaje):
